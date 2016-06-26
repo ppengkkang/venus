@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<description>Receiver Configuration</description>
+
+	<!-- Kafka Message Decoder -->
+	<bean id="decoder" class="com.venus.kafka.codec.MessageDecoderImpl" />
+
+	<!-- Kafka Message Queue -->
+	<bean id="destination" class="com.venus.kafka.core.KafkaDestination">
+		<constructor-arg value="QUEUE.TEST" />
+	</bean>
+	
+	<!-- Kafka Message Consumer -->
+	<bean id="messageConsumer" class="com.venus.kafka.consumer.MessageConsumer">
+	</bean>
+
+	<!-- Kafka Message Listener -->
+	<bean id="messageListener" class="com.venus.kafka.listener.MessageConsumerListener">
+		<property name="consumer" ref="messageConsumer" />
+	</bean>
+
+	<!-- Kafka Message Adapter -->
+	<bean id="messageAdapter" class="com.venus.kafka.core.KafkaMessageAdapter">
+		<property name="decoder" ref="decoder" />
+		<property name="messageListener" ref="messageListener" />
+		<property name="destination" ref="destination" />
+	</bean>
+
+	<!-- Kafka Pool Connection -->
+	<bean id="messageReceiverPool" class="com.venus.kafka.pool.KafkaMessageReceiverPool"
+		init-method="init" destroy-method="destroy">
+		<property name="messageAdapter" ref="messageAdapter" />
+		<property name="config" value="kafka/consumer.properties" />
+		<property name="poolSize" value="10" />
+	</bean>
+
+</beans>
